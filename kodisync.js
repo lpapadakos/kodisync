@@ -56,9 +56,21 @@ function playingSameThing(hosts) {
 	if (hosts.some((host) => host.playerid == null)) return false;
 	return !hosts.some((host, index) => {
 		if (index === 0) return false;
-		return host.currentItem.showtitle !== hosts[0].currentItem.showtitle
+
+		// Check if showtitle, season, or episode differs. If showtitle is empty or season/episode are -1, treat as mismatch
+		const showMismatch = (!host.currentItem.showtitle || !hosts[0].currentItem.showtitle) // Empty showtitle mismatch
+			|| host.currentItem.season === -1 || hosts[0].currentItem.season === -1 // Season -1 mismatch
+			|| host.currentItem.episode === -1 || hosts[0].currentItem.episode === -1 // Episode -1 mismatch
+			|| host.currentItem.showtitle !== hosts[0].currentItem.showtitle
 			|| host.currentItem.season !== hosts[0].currentItem.season
 			|| host.currentItem.episode !== hosts[0].currentItem.episode;
+
+		// Check if currentItem.title (non-empty) or currentItem.label matches
+		const titleOrLabelMatches = (host.currentItem.title && hosts[0].currentItem.title && host.currentItem.title === hosts[0].currentItem.title)
+			|| host.currentItem.label === hosts[0].currentItem.label;
+
+		// If showMismatch is true but titleOrLabelMatches is also true, they are playing the same uncategorized video
+		return showMismatch && !titleOrLabelMatches;
 	});
 }
 
@@ -157,7 +169,10 @@ class Host {
 		if (this.currentItem.showtitle) {
 			return `${this.currentItem.showtitle} ${pad(this.currentItem.season, 2)}x${pad(this.currentItem.episode, 2)}, "${this.currentItem.title}"`;
 		}
-		return this.currentItem.title;
+		if (this.currentItem.title) {
+			return this.currentItem.title;
+		}
+		return this.currentItem.label;
 	}
 }
 
