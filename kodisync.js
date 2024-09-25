@@ -54,23 +54,25 @@ async function wait(ms) {
 function playingSameThing(hosts) {
 	if (hosts.length < 2) return true;
 	if (hosts.some((host) => host.playerid == null)) return false;
-	return !hosts.some((host, index) => {
-		if (index === 0) return false;
+	return hosts.every((host, index) => {
+		if (index === 0) return true;
 
-		// Check if showtitle, season, or episode differs. If showtitle is empty or season/episode are -1, treat as mismatch
-		const showMismatch = (!host.currentItem.showtitle || !hosts[0].currentItem.showtitle) // Empty showtitle mismatch
-			|| host.currentItem.season === -1 || hosts[0].currentItem.season === -1 // Season -1 mismatch
-			|| host.currentItem.episode === -1 || hosts[0].currentItem.episode === -1 // Episode -1 mismatch
-			|| host.currentItem.showtitle !== hosts[0].currentItem.showtitle
-			|| host.currentItem.season !== hosts[0].currentItem.season
-			|| host.currentItem.episode !== hosts[0].currentItem.episode;
+		// Check if showtitle, season, and episode information is available (non-empty and not -1)
+		const showInfoAvailable = (host.currentItem.showtitle && hosts[0].currentItem.showtitle)
+			&& host.currentItem.season !== -1 && hosts[0].currentItem.season !== -1
+			&& host.currentItem.episode !== -1 && hosts[0].currentItem.episode !== -1;
 
-		// Check if currentItem.title (non-empty) or currentItem.label matches
-		const titleOrLabelMatches = (host.currentItem.title && hosts[0].currentItem.title && host.currentItem.title === hosts[0].currentItem.title)
+		// Check if showtitle, season, and episode match
+		const showMatches = host.currentItem.showtitle === hosts[0].currentItem.showtitle
+			&& host.currentItem.season === hosts[0].currentItem.season
+			&& host.currentItem.episode === hosts[0].currentItem.episode;
+
+		// Check if title or label matches
+		const titleOrLabelMatches = host.currentItem.title === hosts[0].currentItem.title
 			|| host.currentItem.label === hosts[0].currentItem.label;
 
-		// If showMismatch is true but titleOrLabelMatches is also true, they are playing the same uncategorized video
-		return showMismatch && !titleOrLabelMatches;
+		// Use showMatches if showInfoAvailable, otherwise use titleOrLabelMatches
+		return showInfoAvailable ? showMatches : titleOrLabelMatches;
 	});
 }
 
