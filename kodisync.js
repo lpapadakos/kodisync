@@ -58,7 +58,7 @@ function playingSameThing(hosts) {
 		if (index === 0) return true;
 
 		// Check if showtitle, season, and episode information is available (non-empty and not -1)
-		const showInfoAvailable = (host.currentItem.showtitle && hosts[0].currentItem.showtitle)
+		const showInfoAvailable = host.currentItem.showtitle && hosts[0].currentItem.showtitle
 			&& host.currentItem.season !== -1 && hosts[0].currentItem.season !== -1
 			&& host.currentItem.episode !== -1 && hosts[0].currentItem.episode !== -1;
 
@@ -171,10 +171,7 @@ class Host {
 		if (this.currentItem.showtitle) {
 			return `${this.currentItem.showtitle} ${pad(this.currentItem.season, 2)}x${pad(this.currentItem.episode, 2)}, "${this.currentItem.title}"`;
 		}
-		if (this.currentItem.title) {
-			return this.currentItem.title;
-		}
-		return this.currentItem.label;
+		return this.currentItem.title || this.currentItem.label;
 	}
 }
 
